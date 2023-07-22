@@ -1,6 +1,6 @@
 {
-  "name": "ttswd-gui",
-  "version": "0.0.0",
+  "name": "ttswd",
+  "version": "0.0.2",
   "description": "",
   "scripts": {
     "start": "vite",

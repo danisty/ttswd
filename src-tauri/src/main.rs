@@ -7,7 +7,7 @@
 extern crate lazy_static;
 
 use std::{fs, env};
-use ttswd_gui::modinfo::get_workshop_mod;
+use ttswd::gameinfo::get_workshop_game;
 use tauri::{Manager, WindowEvent};
 use scraper::{Html, Selector};
 use serde_json::{Value, json};
@@ -21,31 +21,31 @@ lazy_static! {
 }
 
 #[tauri::command(async)]
-fn download_mod(id: &str, author: &str, img: &str) -> bool {
-    let mut mod_json: Value = match get_workshop_mod(id) {
+fn download_game(id: &str, author: &str, img: &str) -> bool {
+    let mut game_json: Value = match get_workshop_game(id) {
         Ok(m) => m,
         Err(e) => {
-            println!("[ERROR] Failed to get mod info. {}", e);
+            println!("[ERROR] Failed to get game info. {}", e);
             return false;
         }
     };
 
-    mod_json["id"] = json!(id);
-    mod_json["author"] = json!(author);
-    mod_json["img"] = json!(img);
+    game_json["id"] = json!(id);
+    game_json["author"] = json!(author);
+    game_json["img"] = json!(img);
 
     let save_path = format!("{}/{}.json", *WORKSHOP_FOLDER, id);
-    if let Err(e) = fs::write(&save_path, mod_json.to_string()) {
+    if let Err(e) = fs::write(&save_path, game_json.to_string()) {
         println!("[ERROR] Failed to write save file. {}", e);
     } else {
-        println!("[DONE] Mod saved at /Mods/Workshop/{}.json. You may now play it!", id);
+        println!("[DONE] Game saved at /Mods/Workshop/{}.json. You may now play it!", id);
     }
 
     true
 }
 
 #[tauri::command(async)]
-fn remove_mod(id: &str) -> bool {
+fn remove_game(id: &str) -> bool {
     if let Ok(_) = fs::remove_file(format!("{}/{}.json", *WORKSHOP_FOLDER, id)) {
         true
     } else {
@@ -58,7 +58,7 @@ fn search_workshop(query: &str, sort: &str, library: &str, page: u32) -> String 
     if library == "online" {
         search_online(query, sort, page)
     } else {
-        get_local_mods()
+        get_local_games()
     }
 }
 
@@ -124,7 +124,7 @@ fn search_online(query: &str, sort: &str, page: u32) -> String {
     }).to_string()
 }
 
-fn get_local_mods() -> String {
+fn get_local_games() -> String {
     let mut items: Vec<Value> = vec![];
     
     if let Ok(files) = fs::read_dir(format!("{}", *WORKSHOP_FOLDER)) {
@@ -171,7 +171,7 @@ fn main() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![download_mod, remove_mod, search_workshop])
+        .invoke_handler(tauri::generate_handler![download_game, remove_game, search_workshop])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

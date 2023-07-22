@@ -8,7 +8,7 @@ pub fn decode_contents(contents: Vec<u8>) -> Result<Value, Box<dyn Error>> {
     let mut decoder = Decoder::new(&contents);
     let length = decoder.read_u32() as usize;
 
-    println!("[INFO] Mod contains {} bytes.", length);
+    println!("[INFO] Game contains {} bytes.", length);
 
     loop {
         let (field_type, field_name, field_value) = decoder.get_field();

@@ -1,23 +1,33 @@
+#[macro_use]
+extern crate lazy_static;
+
 use std::{fs, env};
-use ttswd_gui::modinfo::{get_workshop_mod};
+use ttswd::gameinfo::get_workshop_game;
 use serde_json::Value;
+
+lazy_static! {
+    static ref WORKSHOP_FOLDER: String = format!(
+        "{}/Documents/My Games/Tabletop Simulator/Mods/Workshop",
+        dirs::home_dir().unwrap().as_path().to_str().unwrap()
+    );
+}
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let mod_id: &String = match args.get(1) {
+    let id: &String = match args.get(1) {
         Some(s) => s,
-        None => return println!("[ERROR] Mod id not provided. Usage example: ./cli 2522804644")
+        None => return println!("[ERROR] Game id not provided. Usage example: ./ttswd-cli.exe 2522804644")
     };
 
-    let mod_info: Value = match get_workshop_mod(mod_id) {
+    let game_info: Value = match get_workshop_game(id) {
         Ok(m) => m,
-        Err(e) => return println!("[ERROR] Failed to get mod info. {}", e)
+        Err(e) => return println!("[ERROR] Failed to get game info. {}", e)
     };
 
-    let save_path = format!("C:/Users/danis/Documents/My Games/Tabletop Simulator/Mods/Workshop/{}.json", mod_id);
-    if let Err(e) = fs::write(&save_path, mod_info.to_string()) {
+    let save_path = format!("{}/{}.json", *WORKSHOP_FOLDER, id);
+    if let Err(e) = fs::write(&save_path, game_info.to_string()) {
         println!("[ERROR] Failed to write save file. {}", e);
     } else {
-        println!("[DONE] Mod saved at /Mods/Workshop/{}.json. You may now play it!", mod_id);
+        println!("[DONE] Game saved at /Mods/Workshop/{}.json. You may now play it!", id);
     }
 }

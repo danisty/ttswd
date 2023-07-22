@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "ttswd-gui",
-    "version": "0.0.1"
+    "version": "0.0.2"
   },
   "tauri": {
     "allowlist": {
@@ -39,7 +39,7 @@
         "resizable": true,
         "title": "Tabletop Simulator Workshop Downloader",
         "width": 844,
-        "height": 600,
+        "height": 640,
         "minWidth": 644,
         "minHeight": 400
       }

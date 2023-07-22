@@ -60,16 +60,16 @@ function App() {
   });
 
   // EVENTS
-  function onModAction(mod: any): Promise<boolean>  {
+  function onGameAction(game: any): Promise<boolean>  {
     return new Promise(r => {
-      if (mod.downloaded) {
-        invoke("remove_mod", { id: mod.id }).then(() => {
-          mod.downloaded = false;
+      if (game.downloaded) {
+        invoke("remove_game", { id: game.id }).then(() => {
+          game.downloaded = false;
           r(false);
         });
       } else {
-        invoke("download_mod", { id: mod.id, author: mod.author, img: mod.img }).then(() => {
-          mod.downloaded = true;
+        invoke("download_game", { id: game.id, author: game.author, img: game.img }).then(() => {
+          game.downloaded = true;
           r(true);
         });
       }
@@ -162,8 +162,8 @@ function App() {
     )
   }
 
-  function createCard(mod: any) {
-    const [downloaded, setDownloaded] = createSignal(mod.downloaded);
+  function createCard(game: any) {
+    const [downloaded, setDownloaded] = createSignal(game.downloaded);
     const [downloading, setDownloading] = createSignal(false);
   
     return (
@@ -171,15 +171,15 @@ function App() {
         <CardMedia
           class="h-[240px]"
           component="img"
-          image={mod.img}
+          image={game.img}
           alt="If you're seeing this, go watch The Ancient Magus Bride immediately ᓚᘏᗢ"
         />
         <Box class="p-2">
           <Typography gutterBottom fontSize={17} textOverflow="ellipsis">
-            <div title={mod.title} class="truncate">{mod.title}</div>
+            <div title={game.title} class="truncate">{game.title}</div>
           </Typography>
           <Typography variant="body2" color="text.secondary" textOverflow="ellipsis" class="pb-2">
-            {mod.author}
+            {game.author}
           </Typography>
           <Button
             class="w-full h-9"
@@ -187,8 +187,8 @@ function App() {
             disabled={downloading()}
             color={downloaded() ? "secondary" : "primary"}
             onClick={() => {
-              if (!mod.downloaded) setDownloading(true);
-              onModAction(mod).then((downloaded: boolean) => {
+              if (!game.downloaded) setDownloading(true);
+              onGameAction(game).then((downloaded: boolean) => {
                 setDownloading(false);
                 setDownloaded(downloaded);
               });
@@ -222,7 +222,7 @@ function App() {
               <TextField
                 id="search-bar"
                 class="w-full"
-                label="Search for a mod"
+                label="Search for a game"
                 variant="outlined"
                 size="small"
                 value={query()}

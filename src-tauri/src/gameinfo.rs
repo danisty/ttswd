@@ -2,9 +2,9 @@ use std::{io::Cursor, error::Error, fs};
 use serde_json::Value;
 use super::decoder::decode_contents;
 
-pub fn get_workshop_mod(mod_id: &str) -> Result<Value, Box<dyn Error>> {
-    let mod_contents: Vec<u8>;
-    let cache_file_path = format!("cache/Download_{}", mod_id);
+pub fn get_workshop_game(game_id: &str) -> Result<Value, Box<dyn Error>> {
+    let game_contents: Vec<u8>;
+    let cache_file_path = format!("cache/Download_{}", game_id);
 
     if let Err(_) = fs::metadata("cache") {
         if let Err(e) = fs::create_dir("cache") {
@@ -13,24 +13,24 @@ pub fn get_workshop_mod(mod_id: &str) -> Result<Value, Box<dyn Error>> {
     }
 
     if let Ok(contents) = fs::read(&cache_file_path) {
-        mod_contents = contents;
-        println!("[INFO] Mod is cached. Loading from file.")
+        game_contents = contents;
+        println!("[INFO] Game is cached. Loading from file.")
     } else {
-        println!("[INFO] Mod is not cached. Requesting mod from external server [https://steamworkshopdownloader.io/]...");
+        println!("[INFO] Game is not cached. Requesting game from external server [https://steamworkshopdownloader.io/]...");
     
         let body = ureq::post("https://db.steamworkshopdownloader.io/prod/api/details/file")
             .set("content-type", "application/x-www-form-urlencoded")
-            .send(Cursor::new(format!("[{}]", mod_id)))?
+            .send(Cursor::new(format!("[{}]", game_id)))?
             .into_string()?;
     
         let parsed: Value = serde_json::from_str(&body)?;
         if let None = parsed[0]["file_url"].as_str() {
-            return Err("Download URL for mod file not found.".into());
+            return Err("Download URL for game file not found.".into());
         }
         
-        println!("[INFO] Got mod {:?}", parsed[0]["title"]);
+        println!("[INFO] Got game {}", parsed[0]["title"]);
         println!("[INFO] Found url {}.", parsed[0]["file_url"]);
-        println!("[INFO] Requesting mod...");
+        println!("[INFO] Requesting game...");
     
         let response = ureq::get(parsed[0]["file_url"].as_str().unwrap()).call()?;
         let mut buf: Vec<u8> = vec![];
@@ -41,10 +41,10 @@ pub fn get_workshop_mod(mod_id: &str) -> Result<Value, Box<dyn Error>> {
             println!("[WARN] Failed to save file on cache. {}", e);
         }
 
-        mod_contents = buf;
+        game_contents = buf;
     }
 
-    match decode_contents(mod_contents) {
+    match decode_contents(game_contents) {
         Ok(m) => Ok(m),
         Err(e) => Err(format!("Failed to decode contents. {}", e).into())
     }
